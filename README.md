@@ -2,7 +2,7 @@
 
 > A production-style weather data pipeline with automated quality validation, built as a portfolio project demonstrating data engineering and test engineering skills.
 
-![CI](https://github.com/<PantelisTsagkas/pipeline-guard/actions/workflows/pipeline.yml/badge.svg)
+![CI](https://github.com/PantelisTsagkas/pipeline-guard/actions/workflows/pipeline.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 ![Tests](https://img.shields.io/badge/tests-117%20passing-brightgreen)
 ![AWS](https://img.shields.io/badge/AWS-S3-orange)

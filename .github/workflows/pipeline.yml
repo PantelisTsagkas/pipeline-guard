@@ -1,0 +1,86 @@
+name: Pipeline Guard CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run the full pipeline every day at 08:00 UTC
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    # Allow manual runs from the GitHub Actions UI
+
+jobs:
+  # ── Job 1: Tests ────────────────────────────────────────────────────────────
+  test:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests with coverage
+        run: |
+          python -m pytest tests/ \
+            --tb=short \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            -v
+        env:
+          # Tests use mocks — no real credentials needed here
+          OPENWEATHER_API_KEY: "test-key"
+          WEATHER_CITY: "Athens"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ── Job 2: Pipeline Run ─────────────────────────────────────────────────────
+  run-pipeline:
+    name: Run Pipeline & Upload to S3
+    runs-on: ubuntu-latest
+    needs: test  # Only runs if all tests pass
+    # Only runs on push/schedule/manual — not on pull requests
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full pipeline
+        run: python -m src.pipeline
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          WEATHER_CITY:        ${{ secrets.WEATHER_CITY }}
+          AWS_ACCESS_KEY_ID:   ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION:          ${{ secrets.AWS_REGION }}
+          S3_BUCKET_NAME:      ${{ secrets.S3_BUCKET_NAME }}
+
+      - name: Print pipeline summary
+        if: always()
+        run: echo "Pipeline run complete. Check logs above for S3 upload URIs."

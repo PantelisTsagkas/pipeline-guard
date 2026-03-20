@@ -25,7 +25,7 @@ def valid_df():
         "country":          "GR",
         "latitude":         37.97,
         "longitude":        23.72,
-        "temp_c":           28.4,
+        "temp_c":           28.3,
         "feels_like_c":     27.9,
         "temp_min_c":       25.0,
         "temp_max_c":       30.1,

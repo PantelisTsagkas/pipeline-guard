@@ -11,6 +11,12 @@ on:
   workflow_dispatch:
     # Allow manual runs from the GitHub Actions UI
 
+env:
+  # Opt into Node.js 24 early to silence the Node.js 20 deprecation warning.
+  # Actions (checkout, setup-python, upload-artifact) will be forced to Node 24
+  # by default on 2 June 2026 anyway; this just makes it explicit now.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # ── Job 1: Tests ────────────────────────────────────────────────────────────
   test:

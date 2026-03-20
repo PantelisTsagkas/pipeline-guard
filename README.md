@@ -11,7 +11,7 @@
 
 ## What it does
 
-Pipeline - Guard fetches live weather data from OpenWeatherMap, transforms and validates it against a strict data quality schema, then stores the results in AWS S3 — automatically, on every push to `main` via GitHub Actions CI.
+Pipeline - Guard fetches live weather data from OpenWeatherMap, transforms and validates it against a strict data quality schema, then stores the results in AWS S3 — automatically, on every push to `main` via GitHub Actions CI.. 
 
 ```
 OpenWeatherMap API

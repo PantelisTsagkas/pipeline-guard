@@ -103,8 +103,8 @@ def run_pipeline(city: str = None) -> PipelineResult:
 
         # ── Stage 4: Upload ───────────────────────────────────────────────────
         logger.info("▶ Stage 4/4: Upload to S3")
-        upload_results = upload.run(raw, df)
         result.stage_reached = "upload"
+        upload_results = upload.run(raw, df)
 
         result.raw_s3_uri       = upload_results["raw"].s3_uri
         result.processed_s3_uri = upload_results["processed"].s3_uri

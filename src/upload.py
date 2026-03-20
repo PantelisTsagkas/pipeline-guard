@@ -73,12 +73,18 @@ class UploadResult:
 # ── Core Upload Functions ──────────────────────────────────────────────────────
 
 def _get_s3_client():
-    """Create a boto3 S3 client from environment variables."""
+    """Create a boto3 S3 client from environment variables.
+
+    Values are stripped of surrounding whitespace so that a secret saved
+    with a trailing newline (a common copy-paste mistake in GitHub Actions)
+    does not produce a malformed endpoint URL.
+    """
+    region = (os.getenv("AWS_REGION", "eu-north-1") or "eu-north-1").strip()
     return boto3.client(
         "s3",
-        region_name=os.getenv("AWS_REGION", "eu-north-1"),
-        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        region_name=region,
+        aws_access_key_id=(os.getenv("AWS_ACCESS_KEY_ID") or "").strip() or None,
+        aws_secret_access_key=(os.getenv("AWS_SECRET_ACCESS_KEY") or "").strip() or None,
     )
 
 
@@ -96,11 +102,11 @@ def upload_raw(raw: dict, city: str, timestamp: datetime, bucket: str, s3_client
     Returns:
         UploadResult
     """
-    client = s3_client or _get_s3_client()
     key = build_s3_key(city, timestamp, "raw")
     s3_uri = f"s3://{bucket}/{key}"
 
     try:
+        client = s3_client or _get_s3_client()
         body = json.dumps(raw, indent=2).encode("utf-8")
         client.put_object(
             Bucket=bucket,
@@ -116,7 +122,7 @@ def upload_raw(raw: dict, city: str, timestamp: datetime, bucket: str, s3_client
         logger.info(f"✅ Raw JSON uploaded → {s3_uri}")
         return UploadResult(success=True, bucket=bucket, key=key, s3_uri=s3_uri)
 
-    except (BotoCoreError, ClientError) as e:
+    except (BotoCoreError, ClientError, ValueError) as e:
         logger.error(f"❌ Failed to upload raw JSON: {e}")
         return UploadResult(success=False, bucket=bucket, key=key, s3_uri=s3_uri, error=str(e))
 
@@ -135,11 +141,11 @@ def upload_processed(df: pd.DataFrame, city: str, timestamp: datetime, bucket: s
     Returns:
         UploadResult
     """
-    client = s3_client or _get_s3_client()
     key = build_s3_key(city, timestamp, "processed")
     s3_uri = f"s3://{bucket}/{key}"
 
     try:
+        client = s3_client or _get_s3_client()
         buffer = io.StringIO()
         df.to_csv(buffer, index=False)
         body = buffer.getvalue().encode("utf-8")
@@ -159,7 +165,7 @@ def upload_processed(df: pd.DataFrame, city: str, timestamp: datetime, bucket: s
         logger.info(f"✅ Processed CSV uploaded → {s3_uri}")
         return UploadResult(success=True, bucket=bucket, key=key, s3_uri=s3_uri)
 
-    except (BotoCoreError, ClientError) as e:
+    except (BotoCoreError, ClientError, ValueError) as e:
         logger.error(f"❌ Failed to upload processed CSV: {e}")
         return UploadResult(success=False, bucket=bucket, key=key, s3_uri=s3_uri, error=str(e))
 
@@ -183,7 +189,7 @@ def run(raw: dict, df: pd.DataFrame, bucket: str = None, s3_client=None) -> dict
         EnvironmentError: If bucket name is not provided or set in env
         RuntimeError: If either upload fails
     """
-    bucket = bucket or os.getenv("S3_BUCKET_NAME")
+    bucket = (bucket or os.getenv("S3_BUCKET_NAME") or "").strip() or None
     if not bucket:
         raise EnvironmentError("S3_BUCKET_NAME is not set in environment or .env file")
 

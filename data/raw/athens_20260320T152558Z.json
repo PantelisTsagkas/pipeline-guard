@@ -1,0 +1,46 @@
+{
+  "coord": {
+    "lon": 23.7162,
+    "lat": 37.9795
+  },
+  "weather": [
+    {
+      "id": 800,
+      "main": "Clear",
+      "description": "clear sky",
+      "icon": "01d"
+    }
+  ],
+  "base": "stations",
+  "main": {
+    "temp": 9.97,
+    "feels_like": 8.16,
+    "temp_min": 8.95,
+    "temp_max": 10.92,
+    "pressure": 1007,
+    "humidity": 66,
+    "sea_level": 1007,
+    "grnd_level": 984
+  },
+  "visibility": 10000,
+  "wind": {
+    "speed": 3.58,
+    "deg": 86,
+    "gust": 6.71
+  },
+  "clouds": {
+    "all": 0
+  },
+  "dt": 1774019596,
+  "sys": {
+    "type": 2,
+    "id": 2005332,
+    "country": "GR",
+    "sunrise": 1773980948,
+    "sunset": 1774024573
+  },
+  "timezone": 7200,
+  "id": 264371,
+  "name": "Athens",
+  "cod": 200
+}

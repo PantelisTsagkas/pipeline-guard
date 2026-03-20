@@ -161,7 +161,7 @@ class TestStageFailures:
              patch("src.pipeline.upload.run", side_effect=RuntimeError("S3 upload failed")):
             result = run_pipeline(city="Athens")
         assert result.success is False
-        assert result.stage_reached == "validate"
+        assert result.stage_reached == "upload"
         assert "Runtime error" in result.error
 
     def test_upload_env_error(self, mock_raw, mock_df):
